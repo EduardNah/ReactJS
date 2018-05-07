@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="style.css">
+    <title>ReactJS</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.14.0/react.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.14.0/react-dom.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.6.15/browser.js"></script>
+  </head>
+  <body>
+    <div id="exemple"></div>
+    <script type="text/babel" >
+     
+      var Task = React.createClass ({
+        getInitialState: function (){
+          return {edit: false}
+        },
+        edit: function () {
+          this.setState({edit: true});
+        },
+        
+        save: function() {
+          this.props.update(this.refs.newTxt.value, this.props.index);
+          this.setState({edit: false});
+        },
+        rendNorm: function (){
+          return (
+            <div className="box2">
+              <div className="text"> {this.props.children} </div>
+              <button onClick= {this.edit} className="btn light"> EDIT </button>
+            </div>
+          );
+        },
+        rendEdit: function () {
+          return (
+            <div className="box2">
+              <textarea ref="newTxt" placeholder="Enter new task" defaultValue={this.props.children}></textarea>
+              <button onClick={this.save} className="btn light">Save</button>
+            </div>
+          );
+        },
+        render: function () {
+            if (this.state.edit){
+              return this.rendEdit();
+            } else {
+              return this.rendNorm();
+            }
+        }
+
+      });
+      var Field = React.createClass({
+        getInitialState: function () {
+          return {
+            tasks: [
+            ]
+          }
+        },
+
+       
+        handleNoteAdd: function(newNote){
+          var newNotes = this.state.tasks.slice();;
+          newNotes.push(newNote);
+          this.setState({tasks:newNotes});
+        },
+        newTask: function(newNote){
+          var newNote = ["New Task"];
+          this.handleNoteAdd(newNote);
+        },
+        updateTeaxt: function (text,i){
+          var arr = this.state.tasks;
+          arr[i] = text;
+          this.setState({tasks:arr});
+        },
+        eachNew: function (item,i) {
+          return (<Task key={i} index={i} update={this.updateTeaxt} >
+                  {item}
+                  </Task>
+                  );
+          },
+        render: function (){
+          var del=this.props.deletBlock;
+          var ind=this.props.index;
+          
+          return(
+            <div className="box">
+              <div className="text">{this.props.children}</div>
+              {this.state.tasks.map (this.eachNew)}
+              <button onClick={del.bind(null,ind)} className="btn red">DELET</button>
+              <button onClick={this.newTask} className="btn red">NEW TASK</button>
+            </div>
+          );
+        }
+      });
+      
+      var Blok = React.createClass({
+        getInitialState: function () {
+          return {
+            text:"",
+            tasksN: [
+                    
+                    ]
+          }
+        },
+
+        deleteBlock: function(bord){
+          var bordId = bord.id;
+          var NewBordId = this.state.tasksN.filter(function(bord){
+            return bord.id !== bordId;
+
+          });
+          this.setState({tasksN:NewBordId});
+          console.log(bordId, NewBordId);
+        },
+        add: function (text){
+          
+          var arr = this.state.tasksN.slice();
+          arr.push(text);
+          this.setState({tasksN:arr});
+        },
+        handleTextChange:function (event) {
+          this.setState({ text: event.target.value });
+        },
+        handelBord:function (){
+          var newBord = {
+            id:Date.now(),
+            text:this.state.text
+          };
+          if(this.state.text){
+            this.add(newBord);
+            this.setState({ text:''});
+          }else{alert("Enter Name");}
+          
+        },
+        
+        eachTask: function (bord) {
+          var onDeletBock= this.deleteBlock;
+          return (<Field 
+                  key={bord.id} 
+                  index={bord.id} 
+                  deletBlock={onDeletBock.bind(null,bord)}>
+                  {bord.text}
+                  </Field>
+                  );
+          },
+        render: function (){
+          return(
+          <div>
+            <div className="border-grid">
+            <textarea 
+            className="textarea" 
+            cols="30" 
+            rows="10"
+            placeholder="Enter Border name"
+            value={this.state.text}
+            onChange={this.handleTextChange}
+            >  
+            </textarea>
+            <button onClick={this.handelBord} className="btn new">New Border</button>
+            </div>
+            <div className="notes-grid">
+          
+              {this.state.tasksN.map(this.eachTask)}
+            </div>
+          </div>
+          );
+        }
+      });
+
+      const app = document.getElementById("exemple");
+      ReactDOM.render(<Blok />,app);
+
+    </script>
+
+  </body>
+</html>
